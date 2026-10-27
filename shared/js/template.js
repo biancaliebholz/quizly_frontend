@@ -4,6 +4,23 @@ function getSpeechTemplate() {
     `;
 }
 
+function getVideoConsentTemplate() {
+  return `
+      <p class="video-consent-notice">
+        This video is hosted on YouTube. Loading it transmits data such as your
+        IP address to YouTube/Google (privacy-enhanced mode, youtube-nocookie.com).
+        More in the <a href="./privacy.html">privacy policy</a>.
+      </p>
+      <button class="btn btn-quiz" onclick="loadVideo()">Load video</button>
+    `;
+}
+
+function getVideoNotFoundTemplate() {
+  return `
+      <img src="/assets/img/video-not-found.svg" alt="Video not found">
+    `;
+}
+
 function getHeaderTemplate() {
   if (window.location.pathname.endsWith("quiz.html")) {
     return `

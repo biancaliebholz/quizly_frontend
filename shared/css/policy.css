@@ -17,6 +17,12 @@
   font-family: "Kantumruy Pro", sans-serif;
 }
 
+.main-privacy a,
+.main-privacy a:visited {
+  color: var(--text-color-green);
+  text-decoration: underline;
+}
+
 .background-objects {
   top: 0;
   left: 0;

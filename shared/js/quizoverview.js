@@ -1,18 +1,19 @@
 const headlineInput = document.getElementById("headline");
 const penIconHeadline = document.getElementById("pen");
 const descriptionInput = document.getElementById("description");
-const iFrame = document.getElementById("iFrame-video");
+const videoContainer = document.getElementById("iFrame-video");
 const hookIconTextarea = document.getElementById("hook");
 
 let CURRENTQUIZ;
 let QUIZZES;
+let VIDEOID;
 
 async function init() {
   CURRENTQUIZ = await loadQuizzes(getQuizID());
   if (!CURRENTQUIZ) return;
   headlineInput.value = CURRENTQUIZ.title;
   descriptionInput.value = CURRENTQUIZ.description;
-  iFrame.src = getEmbededURL(CURRENTQUIZ.video_url);
+  renderVideoPlaceholder(CURRENTQUIZ.video_url);
   QUIZZES = await loadQuizzes();
   await renderPreviousQuizzes();
   setupEventListeners();
@@ -81,12 +82,45 @@ function isOlderThan7Days(dateString) {
   return date >= sevenDaysAgo && date < today;
 }
 
-function getEmbededURL(url) {
-  const match = url.match(/v=([^&]+)/);
-  if (match) {
-    return `https://www.youtube.com/embed/${match[1]}`;
+/**
+ * Extracts the YouTube video ID from a watch URL
+ * @param {string} url - The video URL of the quiz
+ * @returns {string|null} The 11-character video ID or null
+ */
+function getVideoId(url) {
+  const match = (url || "").match(/[?&]v=([A-Za-z0-9_-]{11})(?:&|$)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Renders a local placeholder instead of the video.
+ * Nothing is requested from YouTube until the user clicks "Load video".
+ * @param {string} url - The video URL of the quiz
+ */
+function renderVideoPlaceholder(url) {
+  VIDEOID = getVideoId(url);
+  if (VIDEOID) {
+    videoContainer.innerHTML = getVideoConsentTemplate();
+  } else {
+    videoContainer.classList.add("video-embedded");
+    videoContainer.innerHTML = getVideoNotFoundTemplate();
   }
-  return `https://placehold.co/450x250?text=Video+not+found`;
+}
+
+/**
+ * Replaces the placeholder with the YouTube iframe (privacy-enhanced mode)
+ */
+function loadVideo() {
+  if (!VIDEOID) return;
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://www.youtube-nocookie.com/embed/${VIDEOID}`;
+  iframe.title = "YouTube video";
+  iframe.allow =
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+  iframe.referrerPolicy = "strict-origin-when-cross-origin";
+  iframe.allowFullscreen = true;
+  videoContainer.classList.add("video-embedded");
+  videoContainer.replaceChildren(iframe);
 }
 
 /**
